@@ -20,8 +20,7 @@ const messageSchema = new mongoose.Schema({
   read: {
     type: Boolean,
     require: true
-  },
-  deletedBy: String
+  }
 });
 
 messageSchema.set("toJSON", {

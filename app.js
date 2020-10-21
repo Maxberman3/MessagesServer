@@ -1,10 +1,10 @@
 const config = require("./utils/config");
-const http = require("http");
 const express = require("express");
 require("express-async-errors");
 const app = express();
 const usersRouter = require("./controllers/users");
 const messagesRouter = require("./controllers/messages");
+const loginRouter = require("./controllers/login");
 const mongoose = require("mongoose");
 const middleware = require("./utils/middleware");
 
@@ -25,7 +25,8 @@ app.use(middleware.morganLogger());
 app.use(middleware.tokenExtractor);
 
 app.use("/api/users", usersRouter);
-app.use("/api/messagesRouter", messagesRouter);
+app.use("/api/messages", messagesRouter);
+app.use("/api/login", loginRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);

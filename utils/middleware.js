@@ -6,6 +6,9 @@ morgan.token("data", req => {
 });
 
 const morganLogger = () => {
+  if (process.env.NODE_ENV === "test") {
+    return (req, res, next) => next();
+  }
   return morgan(
     ":method :url :status :res[content-length] - :response-time ms :data"
   );

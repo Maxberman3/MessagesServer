@@ -1,7 +1,7 @@
 const usersRouter = require("express").Router();
 const User = require("../models/User");
-const Message = require("../models/Message");
 const bcrypt = require("bcrypt");
+const Message = require("../models/Message");
 
 usersRouter.post("/", async (request, response) => {
   const body = request.body;
@@ -13,8 +13,8 @@ usersRouter.post("/", async (request, response) => {
 
   const user = new User({
     username: body.username,
-    name: body.name,
-    passwordHash
+    passwordHash,
+    messages: []
   });
   const savedUser = await user.save();
   response.json(savedUser);
@@ -25,21 +25,60 @@ usersRouter.get("/", async (request, response) => {
   response.json(users);
 });
 
-usersRouter.get("/messages/:id/:onlyUnread", async (request, response) => {
-  if (!request.params.id || !request.params.onlyUnread) {
+usersRouter.get("/:id/messages/:onlyUnread?", async (request, response) => {
+  let {onlyUnread, id} = request.params;
+  if (!id) {
     response
       .status(400)
-      .json({error: "You are missing a parameter in your request"});
+      .json({error: "You are missing an id parameter in your request"});
   }
-  const user = await User.findById(request.params.id);
+  if (!onlyUnread) {
+    onlyUnread = "false";
+  }
+  const user = await User.findById(request.params.id).populate("messages", {
+    sender: 1,
+    reciever: 1,
+    message: 1,
+    subject: 1,
+    creationDate: 1,
+    read: 1
+  });
   if (!user) {
     response.status(400).json({error: "There is no user with that id"});
   }
-  const userMessages = await user.populate("messages").messages;
   let messages =
-    request.params.onlyUnread.toLowerCase() === "true"
-      ? userMessages.filter(message => !message.read)
-      : userMessages;
+    onlyUnread.toLowerCase() === "true"
+      ? user.messages.filter(message => !message.read)
+      : user.messages;
   response.json(messages);
+});
+
+usersRouter.delete("/:id/messages/:messageid", async (request, response) => {
+  const {id, messageid} = request.params;
+  if (!id || !messageid) {
+    return response
+      .status(400)
+      .json({error: "You are missing a parameter in your request"});
+  }
+  const deleteMessage = await Message.findById(messageid);
+  if (!deleteMessage) {
+    return response.status(400).json({error: "The is no message with that id"});
+  }
+  if (
+    deleteMessage.sender.toString() !== id &&
+    deleteMessage.receiver.toString() !== id
+  ) {
+    return response.status(403).json({
+      error: "Only the sender or receiver of a messages can delete that message"
+    });
+  }
+  let sender = await User.findById(deleteMessage.sender);
+  let receiver = await User.findById(deleteMessage.receiver);
+  sender.messages = sender.messages.filter(message => message._id !== id);
+  await sender.save();
+  receiver.messages = receiver.messages.filter(message => message._id !== id);
+  await receiver.save();
+  await deleteMessage.remove();
+  response.status(204).end();
 });
 module.exports = usersRouter;
