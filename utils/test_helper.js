@@ -48,19 +48,19 @@ const initialMessages = [
 ];
 const initialUsers = [
   {
-    username: "Frank Reynolds",
+    username: "FrankReynolds",
     passwordHash: null,
     _id: userId1,
     messages: [messageId1, messageId2]
   },
   {
-    username: "Charlie Day",
+    username: "CharlieDay",
     passwordHash: null,
     _id: userId2,
     messages: [messageId1, messageId2, messageId3]
   },
   {
-    username: "Sweet Dee",
+    username: "SweetDee",
     passwordHash: null,
     _id: userId3,
     messages: [messageId3]

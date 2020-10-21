@@ -36,7 +36,7 @@ test("reading a message", async () => {
   expect(afterPost.read).toBeTruthy();
 });
 
-test.only("a logged in user can get their all of their messages", async () => {
+test("a logged in user can get their all of their messages", async () => {
   const frank = helper.initialUsers[0];
   const loginResponse = await api
     .post("/api/login")

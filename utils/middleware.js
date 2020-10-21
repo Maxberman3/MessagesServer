@@ -5,6 +5,7 @@ morgan.token("data", req => {
   return JSON.stringify(data);
 });
 
+//a command line logger to report requests
 const morganLogger = () => {
   if (process.env.NODE_ENV === "test") {
     return (req, res, next) => next();
@@ -14,10 +15,12 @@ const morganLogger = () => {
   );
 };
 
+//final middleware to report invalid url requests
 const unknownEndpoint = (request, response) => {
   response.status(404).send({error: "unknown endpoint"});
 };
 
+//catch-all error handler for express-async-errors
 const errorHandler = (error, request, response, next) => {
   if (process.env.NODE_ENV !== "test") {
     console.error(error);
